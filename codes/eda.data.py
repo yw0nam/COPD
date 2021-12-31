@@ -24,12 +24,13 @@ ax1.pie(temp.values, labels=temp.index.map(lambda x: x[0]), autopct='%1.1f%%',
         wedgeprops={'edgecolor': 'white'},
         shadow=False,
         # textprops={'fontsize': 7},
-        pctdistance=0.8,
+        pctdistance=0.85,
         counterclock=False,
-        explode=explode,
+        # explode=explode,
         colors=colors
         )
-
+plt.text(0, 0, 'Number of patient =%d'%len(csv), horizontalalignment='center',
+        verticalalignment='center',bbox=dict(facecolor='white', alpha=0.5))
 centre_circle = plt.Circle((0,0),0.70,fc='white')
 fig = plt.gcf()
 fig.gca().add_artist(centre_circle)
