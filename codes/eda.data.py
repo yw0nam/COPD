@@ -1,25 +1,41 @@
 # %%
 import pandas as pd
 import numpy as np
-import datatable 
+from tqdm import tqdm
+import matplotlib.pyplot as plt
+# %%
+csv = pd.read_csv('/mnt/hdd/spow12/work/COPD/data/data.in_oneline.csv')
+# %%
+csv['first_result'] = csv['RSLT_GRP'].map(lambda x: x.split('|')[0])
+csv['last_result'] = csv['RSLT_GRP'].map(lambda x: x.split('|')[-1])
+# %%
+csv['first_result'].value_counts()
+# %%
+csv['last_result'].value_counts()
+# %%
+temp = csv['first_result'].value_counts()
+# %%
+fig1, ax1 = plt.subplots(figsize=(8,12))
+cmap = plt.get_cmap("Set2")
+colors = cmap(np.array([1, 2, 3, 4]))
+explode = (0.05, 0.05, 0.05, 0.05)
+ax1.pie(temp.values, labels=temp.index.map(lambda x: x[0]), autopct='%1.1f%%',
+        startangle=90,
+        wedgeprops={'edgecolor': 'white'},
+        shadow=False,
+        # textprops={'fontsize': 7},
+        pctdistance=0.8,
+        counterclock=False,
+        explode=explode,
+        colors=colors
+        )
 
-# %%
-sm_df_1 = datatable.fread('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_SM_01.csv').to_pandas()
-sm_df_2 = datatable.fread('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_SM_02.csv').to_pandas()
-df = pd.concat([sm_df_1, sm_df_2])
-df = df.reset_index(drop=True)
-# %%
-print(len(df))
-# %%
-df = df[df['RSLT_GRP'] != '']
-df = df.dropna(subset=['RSLT_GRP'])
-# %%
-print(len(df))
-# %%
-temp = pd.DataFrame(df['CDW_ID'].value_counts() >= 2)
-valid_list = temp[temp.CDW_ID].index
-df = df.query("CDW_ID in @valid_list")
-print(len(df))
-# %%
-df.sort_values(['CDW_ID','SM_DATE_N'], ascending=[True, True])
+centre_circle = plt.Circle((0,0),0.70,fc='white')
+fig = plt.gcf()
+fig.gca().add_artist(centre_circle)
+ax1.axis('equal')
+plt.legend(temp.index)
+plt.title('First COPD result distribution', fontsize=16, pad=20)
+plt.tight_layout()
+plt.show()
 # %%
