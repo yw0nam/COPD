@@ -9,17 +9,16 @@ sm_df_2 = datatable.fread('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_SM_02.cs
 df = pd.concat([sm_df_1, sm_df_2])
 df = df.reset_index(drop=True)
 # %%
-print(len(df))
+print(len(df['CDW_ID'].drop_duplicates()))
 # %%
 df = df[df['RSLT_GRP'] != '']
 df = df.dropna(subset=['RSLT_GRP'])
-# %%
-print(len(df))
+print(len(df['CDW_ID'].drop_duplicates()))
 # %%
 temp = pd.DataFrame(df['CDW_ID'].value_counts() >= 2)
 valid_list = temp[temp.CDW_ID].index
 df = df.query("CDW_ID in @valid_list")
-print(len(df))
+print(len(df['CDW_ID'].drop_duplicates()))
 # %%
 df = df.sort_values(['CDW_ID','SM_DATE_N'], ascending=[True, True])
 df = df.reset_index(drop=True)
@@ -37,15 +36,14 @@ for i in tqdm(range(1, len(df))):
 # %%
 df = df.drop(index=row_to_remove)
 df = df.reset_index(drop=True)
-# %%
-print(len(df))
+print(len(df['CDW_ID'].drop_duplicates()))
 # %%
 temp = pd.DataFrame(df['CDW_ID'].value_counts() >= 2)
 valid_list = temp[temp.CDW_ID].index
 df = df.query("CDW_ID in @valid_list")
-print(len(df))
 df = df.reset_index(drop=True)
-
+# %%
+print(len(df['CDW_ID'].drop_duplicates()))
 # %%
 res = []
 for id in tqdm(valid_list):
