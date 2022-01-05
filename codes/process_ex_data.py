@@ -21,25 +21,25 @@ def cal_COPD(FEV1_over_FVC, FVC, FEV1):
     """
     if FEV1_over_FVC >= 70:
         if FVC >= 80:
-            return "Normal", None
+            return "1.Normal", None
         elif FVC >= 60 and FVC < 80:
-            return "Restrictive", 'Mild'
+            return "2.Restrictive", 'Mild'
         elif FVC >= 50 and FVC < 60:
-            return "Restrictive", 'Moderate'
+            return "2.Restrictive", 'Moderate'
         elif FVC < 50:
-            return "Restrictive", 'Severe'
+            return "2.Restrictive", 'Severe'
     elif FEV1_over_FVC < 70:
         if FVC >= 80:
             if FEV1 >= 80:
-                return "Obstructive", 'Mild'
+                return "3.Obstructive", 'Mild'
             elif FEV1 >= 50 and FEV1 < 80:
-                return "Obstructive", 'Moderate'
+                return "3.Obstructive", 'Moderate'
             elif FEV1 >= 30 and FEV1 < 50:
-                return "Obstructive", 'Severe'
+                return "3.Obstructive", 'Severe'
             elif FEV1 < 30:
-                return "Obstructive", 'Very Severe'
+                return "3.Obstructive", 'Very Severe'
         elif FVC < 80:
-            return "Combined", None
+            return "4.Combined", None
 
 result= df.apply(lambda x: cal_COPD(x['FEV1FVC_PRE'], x['FVC_PRED'], x['FEV1_PRED']), axis=1)
 df['RSLT_GRP'] = result.map(lambda x: x[0])
