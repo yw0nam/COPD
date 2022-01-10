@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 # %%
-csv = pd.read_csv('/mnt/hdd/spow12/work/COPD/data/data.in_oneline.csv')
+csv = pd.read_csv('./../data/sm_ex_one_line.csv')
 # %%
 csv['first_result'] = csv['RSLT_GRP'].map(lambda x: x.split('|')[0])
 csv['last_result'] = csv['RSLT_GRP'].map(lambda x: x.split('|')[-1])

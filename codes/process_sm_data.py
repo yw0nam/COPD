@@ -52,13 +52,19 @@ df = df.query("CDW_ID in @valid_list")
 df = df.reset_index(drop=True)
 # %%
 print(len(df['CDW_ID'].drop_duplicates()))
-
+df['SM'] = df['SM'].fillna('N')
 # %%
 res = []
 for id in tqdm(valid_list):
     temp = df.query('CDW_ID == @id')
     date = '|'.join(temp['SM_DATE_N'].to_list())
     result = '|'.join(temp['RSLT_GRP'].to_list())
+    is_sm = '|'.join(temp['SM'].to_list())
     res.append({'CDW_ID':id, 
                 'SM_DATE_N': date,
-                'RSLT_GRP': result})
+                'RSLT_GRP': result,
+                'sm': is_sm})
+
+# %%
+pd.DataFrame(res).to_csv('./../data/sm_ex_one_line.csv', index=False)
+# %%    
