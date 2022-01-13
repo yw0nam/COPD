@@ -17,6 +17,13 @@ ex_df['SM_DATE_N'] = ex_df['FVC_ENFR_DT'].map(lambda x: x[:7])
 df = pd.concat([df, ex_df[['CDW_ID', 'SM_DATE_N', 'GEND_CD', 'AGE', 'RSLT_GRP', 'SEVERITY']]])
 df = df.reset_index(drop=True)
 # %%
+excel = pd.read_excel('../data/03_SCREENDATA_SM_결과비교.xlsx', sheet_name='Sheet1')
+excel['SEVERITY_ORG'] = excel['SEVERITY_ORG'].dropna().map(lambda x: x[2:])
+excel = excel[['CDW_ID', 'SM_DATE_N', 'RSLT_GRP_ORG', 'SEVERITY_ORG']]
+# %%
+df = pd.merge(df, excel, how='left', left_on=['CDW_ID', 'SM_DATE_N'], 
+         right_on=['CDW_ID', 'SM_DATE_N'])
+# %%
 print(len(df['CDW_ID'].drop_duplicates()))
 # %%
 df = df[df['RSLT_GRP'] != '']
@@ -59,10 +66,12 @@ for id in tqdm(valid_list):
     temp = df.query('CDW_ID == @id')
     date = '|'.join(temp['SM_DATE_N'].to_list())
     result = '|'.join(temp['RSLT_GRP'].to_list())
+    darwin_result = '|'.join(temp['RSLT_GRP_ORG'].fillna(temp['RSLT_GRP']).to_list())
     is_sm = '|'.join(temp['SM'].to_list())
     res.append({'CDW_ID':id, 
                 'SM_DATE_N': date,
                 'RSLT_GRP': result,
+                'RSLT_GRP_ORG': darwin_result,
                 'sm': is_sm})
 
 # %%
