@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
-
+import seaborn as sns
 
 def draw_pieplot(df_series, save_path, plot_title):
     temp = df_series.value_counts()
@@ -29,6 +29,29 @@ def draw_pieplot(df_series, save_path, plot_title):
     ax1.axis('equal')
     plt.legend(temp.index)
     plt.title(plot_title, fontsize=16, pad=10)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.show()
+
+def plot_hist_with_group(df, event_col,length_col, save_path, xlim=(0, 260)):
+    fig = plt.figure(figsize=(20, 5))
+    sns.set_style('dark')
+    area1 = fig.add_subplot(1, 4, 1)
+    area1.set_title('Event Group == Normal  follow up lengths')
+    area1.set(xlim=xlim)
+    area2 = fig.add_subplot(1, 4, 2)
+    area2.set_title('Event Group == Restrictive follow up lengths')
+    area2.set(xlim=xlim)
+    area3 = fig.add_subplot(1, 4, 3)
+    area3.set(xlim=xlim)
+    area3.set_title('Event Group == Obstructive follow up lengths')
+    area4 = fig.add_subplot(1, 4, 4)
+    area4.set(xlim=xlim)
+    area4.set_title('Event Group == Combined follow up lengths')
+    sns.histplot(csv_first_normal.query("%s == '1.Normal'"%(event_col))[length_col], ax=area1)
+    sns.histplot(csv_first_normal.query("%s == '2.Restrictive'"%(event_col))[length_col], ax=area2)
+    sns.histplot(csv_first_normal.query("%s == '3.Obstructive'"%(event_col))[length_col], ax=area3)
+    sns.histplot(csv_first_normal.query("%s == '4.Combined'"%(event_col))[length_col], ax=area4)
     plt.tight_layout()
     plt.savefig(save_path)
     plt.show()
@@ -68,5 +91,67 @@ draw_pieplot(csv_first_normal['event_grp_ORG'], save_path='../figure/event_distr
 # %%
 pd.crosstab(csv_first_normal['event_grp_ORG'], csv_first_normal['event_grp'])
 # %%
-csv_first_normal.query('event_grp != event_grp_ORG')
+csv_first_normal
+# %%
+def apply_fn(sm_date, idx):
+    date_ls = sm_date.split('|')
+    return date_ls[0], date_ls[idx]
+
+temp = csv_first_normal.apply(lambda x: apply_fn(x['SM_DATE_N'], x['event_grp_idx']), axis=1)
+csv_first_normal['event_grp_first_date'] = temp.map(lambda x: x[0])
+csv_first_normal['event_grp_event_date'] = temp.map(lambda x: x[1])
+# %%
+csv_first_normal['event_fu_length']  = (pd.to_datetime(csv_first_normal['event_grp_event_date']) - pd.to_datetime(csv_first_normal['event_grp_first_date'])).map(lambda x: x.days // 30)
+# %%
+fig = plt.figure(figsize=(20, 5))
+xlim = (0, 260)
+sns.set_style('dark')
+area1 = fig.add_subplot(1, 4, 1)
+area1.set_title('Event Group == Normal  follow up lengths')
+area1.set(xlim=xlim)
+area2 = fig.add_subplot(1, 4, 2)
+area2.set_title('Event Group == Restrictive follow up lengths')
+area2.set(xlim=xlim)
+area3 = fig.add_subplot(1, 4, 3)
+area3.set(xlim=xlim)
+area3.set_title('Event Group == Obstructive follow up lengths')
+area4 = fig.add_subplot(1, 4, 4)
+area4.set(xlim=xlim)
+area4.set_title('Event Group == Combined follow up lengths')
+sns.histplot(csv_first_normal.query("event_grp == '1.Normal'")['event_fu_length'], ax=area1)
+sns.histplot(csv_first_normal.query("event_grp == '2.Restrictive'")['event_fu_length'], ax=area2)
+sns.histplot(csv_first_normal.query("event_grp == '3.Obstructive'")['event_fu_length'], ax=area3)
+sns.histplot(csv_first_normal.query("event_grp == '4.Combined'")['event_fu_length'], ax=area4)
+# %%
+temp = csv_first_normal.apply(lambda x: apply_fn(x['SM_DATE_N'], x['event_grp_idx_ORG']), axis=1)
+csv_first_normal['event_grp_ORG_first_date'] = temp.map(lambda x: x[0])
+csv_first_normal['event_grp_ORG_event_date'] = temp.map(lambda x: x[1])
+csv_first_normal['event_fu_length_ORG']  = (pd.to_datetime(csv_first_normal['event_grp_ORG_event_date']) - pd.to_datetime(csv_first_normal['event_grp_ORG_first_date'])).map(lambda x: x.days // 30)
+# %%
+fig = plt.figure(figsize=(20, 5))
+xlim = (0, 260)
+sns.set_style('dark')
+area1 = fig.add_subplot(1, 4, 1)
+area1.set_title('Event Group == Normal  follow up lengths')
+area1.set(xlim=xlim)
+area2 = fig.add_subplot(1, 4, 2)
+area2.set_title('Event Group == Restrictive follow up lengths')
+area2.set(xlim=xlim)
+area3 = fig.add_subplot(1, 4, 3)
+area3.set(xlim=xlim)
+area3.set_title('Event Group == Obstructive follow up lengths')
+area4 = fig.add_subplot(1, 4, 4)
+area4.set(xlim=xlim)
+area4.set_title('Event Group == Combined follow up lengths')
+sns.histplot(csv_first_normal.query("event_grp_ORG == '1.Normal'")['event_fu_length'], ax=area1)
+sns.histplot(csv_first_normal.query("event_grp_ORG == '2.Restrictive'")['event_fu_length'], ax=area2)
+sns.histplot(csv_first_normal.query("event_grp_ORG == '3.Obstructive'")['event_fu_length'], ax=area3)
+sns.histplot(csv_first_normal.query("event_grp_ORG == '4.Combined'")['event_fu_length'], ax=area4)
+# %%
+csv_first_normal.groupby(['GEND_CD', 'event_grp']).size()
+# %%
+csv_first_normal.groupby(['GEND_CD', 'event_grp_ORG']).size()
+# %%
+sns.histplot(data=csv_first_normal, x='AGE', hue='event_grp', multiple='stack')
+
 # %%
