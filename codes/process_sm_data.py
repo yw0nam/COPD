@@ -61,6 +61,13 @@ df = df.reset_index(drop=True)
 print(len(df['CDW_ID'].drop_duplicates()))
 df['SM'] = df['SM'].fillna('N')
 # %%
+excel = pd.read_excel('./../data/03_SCREENDATA_SM_orgrslt_fvldata02.xlsx')
+# %%
+df = pd.merge(df, excel[['CDW_ID', 'SM_DATE_N', 'FVL_YN']], how='left', 
+         left_on=['CDW_ID', 'SM_DATE_N'], right_on=['CDW_ID', 'SM_DATE_N'])
+# %%
+df['FVL_YN'] = df['FVL_YN'].fillna('N')
+# %%
 res = []
 for id in tqdm(valid_list):
     temp = df.query('CDW_ID == @id')
@@ -68,12 +75,18 @@ for id in tqdm(valid_list):
     result = '|'.join(temp['RSLT_GRP'].to_list())
     darwin_result = '|'.join(temp['RSLT_GRP_ORG'].fillna(temp['RSLT_GRP']).to_list())
     is_sm = '|'.join(temp['SM'].to_list())
+    FVL = '|'.join(temp['FVL_YN'].to_list())
     res.append({'CDW_ID':id, 
                 'SM_DATE_N': date,
                 'RSLT_GRP': result,
                 'RSLT_GRP_ORG': darwin_result,
+                'GEND_CD' : temp['GEND_CD'].iloc[0],
+                'AGE': temp['AGE'].iloc[0],
+                'FVL_YN' : FVL,
                 'sm': is_sm})
-
+    
 # %%
 pd.DataFrame(res).to_csv('./../data/sm_ex_one_line.csv', index=False)
 # %%    
+pd.DataFrame(res)
+# %%
