@@ -7,6 +7,8 @@ from tqdm import tqdm
 # %%
 df = pd.read_excel('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_외래.xlsx')
 # %%
+pd.read_csv('')
+# %%
 # 책임님이주신것은 올림으로 처리되어있음, 반올림으로 대체
 df['FEV1FVC_PRE'] = round((df['FEV1_PRE'] / df['FVC_PRE'])  * 100, 0).astype(int)
 # %%

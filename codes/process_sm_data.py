@@ -3,18 +3,22 @@ import pandas as pd
 import numpy as np
 import datatable 
 from tqdm import tqdm
+pd.set_option('display.max_columns', None)
 # %%
 sm_df_1 = datatable.fread('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_SM_01.csv').to_pandas()
 sm_df_2 = datatable.fread('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_SM_02.csv').to_pandas()
 sm_df = pd.concat([sm_df_1, sm_df_2])
 sm_df = sm_df.reset_index(drop=True)
-df = sm_df[['CDW_ID', 'SM_DATE_N', 'GEND_CD', 'AGE', 'RSLT_GRP', 'SEVERITY']]
+df = sm_df[['CDW_ID', 'SM_DATE_N', 'GEND_CD', 'AGE', 'RSLT_GRP', 'SEVERITY', 'PRED_SM0401', 'PRED_SM0402']]
 df['SEVERITY'] = df[df['SEVERITY'] != ""]['SEVERITY'].map(lambda x: x[2:])
 df['SM'] = 'Y'
+df = df.rename(columns= {'PRED_SM0401': "FVC", 'PRED_SM0402': "FEV1"})
 # %%
 ex_df = pd.read_csv('/mnt/hdd/spow12/work/COPD/data/03_SCREENDATA_ex.csv')
 ex_df['SM_DATE_N'] = ex_df['FVC_ENFR_DT'].map(lambda x: x[:7])
-df = pd.concat([df, ex_df[['CDW_ID', 'SM_DATE_N', 'GEND_CD', 'AGE', 'RSLT_GRP', 'SEVERITY']]])
+ex_df = ex_df.rename(columns={"FEV1_PRE": "FEV1", "FVC_PRE": "FVC"})
+# %%
+df = pd.concat([df, ex_df[['CDW_ID', 'SM_DATE_N', 'GEND_CD', 'AGE', 'RSLT_GRP', 'SEVERITY', "FEV1", "FVC", 'FVC_ENFR_DT']]])
 df = df.reset_index(drop=True)
 # %%
 excel = pd.read_excel('../data/03_SCREENDATA_SM_결과비교.xlsx', sheet_name='Sheet1')
@@ -61,9 +65,12 @@ df = df.reset_index(drop=True)
 print(len(df['CDW_ID'].drop_duplicates()))
 df['SM'] = df['SM'].fillna('N')
 # %%
-excel = pd.read_excel('./../data/03_SCREENDATA_SM_orgrslt_fvldata02.xlsx')
+fvl_1 = pd.read_excel('./../data/03_SCREENDATA_SM_orgrslt_fvldata01.xlsx')
+fvl_2 = pd.read_excel('./../data/03_SCREENDATA_SM_orgrslt_fvldata02.xlsx')
 # %%
-df = pd.merge(df, excel[['CDW_ID', 'SM_DATE_N', 'FVL_YN']], how='left', 
+temp = pd.concat([fvl_1, fvl_2], ignore_index=True)
+# %%
+df = pd.merge(df, temp[['CDW_ID', 'SM_DATE_N', 'FVL_YN']], how='left', 
          left_on=['CDW_ID', 'SM_DATE_N'], right_on=['CDW_ID', 'SM_DATE_N'])
 # %%
 df['FVL_YN'] = df['FVL_YN'].fillna('N')
@@ -88,5 +95,6 @@ for id in tqdm(valid_list):
 # %%
 pd.DataFrame(res).to_csv('./../data/sm_ex_one_line.csv', index=False)
 # %%    
-pd.DataFrame(res)
+df.to_csv('./../data/data.csv', index=False)
+
 # %%
